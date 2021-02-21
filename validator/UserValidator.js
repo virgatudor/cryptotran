@@ -1,4 +1,5 @@
 const restrictions = require('../models/Restrictions');
+const User = require('../models/User');
 
 const validateUserPersonalDetails = function(req){
     let validationErrors = [];
@@ -16,9 +17,13 @@ const validateUserPersonalDetails = function(req){
     })
 }
 
-const validateUserAccountDetails = function(req){
+const validateUserAccountDetails = async function(req){
     let validationErrors = [];
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
+        let existsUser = await existsUserW(req.body.id);
+        if(!existsUser){
+            validationErrors.push("User with this id does not exist.")
+        }
         if(!isBitcoinWalletIdValid(req.body.bitcoinWalletId)){
             validationErrors.push("Bitcoin Wallet Id not valid.")
         }
@@ -35,7 +40,7 @@ const validateUserAccountDetails = function(req){
         if(!isMaxAmountPerTranValid(req.body.maxAmountPerTran)){
             validationErrors.push("Maximum amount per transaction not valid.")
         }
-        resolve(validationErrors)
+        resolve(validationErrors);
     })
 }
 
@@ -111,6 +116,33 @@ const isMaxAmountPerTranValid = function(maxAmountPerTran){
         return false;
     }
     return true;
+}
+
+const existsUser = async function(id){
+    await User.exists({_id: `${id}`}, function (err, exists){
+        if(exists){
+            console.log(true)
+            return true;
+        }
+        else{
+            console.log(false)
+            return false;
+        }
+    })
+}
+
+const existsUserW = function(id){
+
+    return new Promise((resolve) => {
+        User.exists({_id: `${id}`}, function (err, exists){
+            if(exists){
+                resolve(true)
+            }
+            else{
+                resolve(false)
+            }
+        })
+    })
 }
 
 module.exports = {

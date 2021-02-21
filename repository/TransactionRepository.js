@@ -1,5 +1,25 @@
 const Transaction = require("../models/Transaction");
-
+const User = require("../models/User");
+const { Worker } = require('worker_threads') 
+  
+function runService(workerData) { 
+    return new Promise((resolve, reject) => { 
+        const worker = new Worker( 
+                './tranProcessor.js', { workerData }); 
+        worker.on('message', resolve); 
+        worker.on('error', reject); 
+        worker.on('exit', (code) => { 
+            if (code !== 0) 
+                reject(new Error( `Stopped the Worker Thread with the exit code: ${code}`)); 
+        }) 
+    }) 
+} 
+  
+async function run(transactionData) { 
+    const result = await runService(transactionData) 
+    console.log(result); 
+} 
+   
 const submitTransaction = async function (req) {
     let saveResult = {
         responseCode: 500,
@@ -17,8 +37,21 @@ const submitTransaction = async function (req) {
 
     try{
         await tran.save();
+        let newTran = await Transaction.find({ currencyAmount: `${tran.currencyAmount}`, 
+        currencyType: `${tran.currencyType}`, 
+        sourceUser: `${tran.sourceUser}`,
+        targetUser: `${tran.targetUser}`}).exec();
+        
+        let transactionData = {
+            id: newTran[0]._doc._id,
+            currencyAmount: newTran[0]._doc.currencyAmount,
+            currencyType: newTran[0]._doc.currencyType,
+            sourceUser: newTran[0]._doc.sourceUser,
+            targetUser: newTran[0]._doc.targetUser
+        }
         saveResult.responseCode = 201;
-        saveResult.response = tran.currencyAmount;
+        saveResult.response = newTran[0]._doc._id;
+        run(transactionData);
     }catch (err){
         console.log(err);
         saveResult.response = 'ceva';
@@ -32,13 +65,10 @@ const findTransactionsByUserId = async function (req) {
         responseCode: 500,
         response: "",
     };
-    let transactions = [];
-    await Transaction.find({ sourceUser: `${req.body.id}`}, function (err, docs) {
-        transactions.push(docs);
-    });
-    await Transaction.find({ targetUser: `${req.body.id}`}, function (err, docs) {
-        transactions.push(docs);
-    });
+    let transactions = await Transaction.find({ sourceUser: `${req.body.id}`, state: 'Processed'}).
+        select("currencyAmount currencyType sourceUser targetUser state").exec();
+    transactions.push(await Transaction.find({ targetUser: `${req.body.id}`, state: 'Processed'}).
+        select("currencyAmount currencyType sourceUser targetUser state").exec());
 
     saveResult.responseCode = 201;
     saveResult.response = transactions;
@@ -51,14 +81,11 @@ const findTransactionsStatusById = async function (req) {
         responseCode: 500,
         response: "",
     };
-    let transactionState = '';
-    await Transaction.find({ _id: `${req.body.id}`}, function (err, docs) {
-        transactionState = docs[0].state;
-    });
-    
 
+    let transaction = await Transaction.find({ _id: `${req.body.id}`}).exec();
+    
     saveResult.responseCode = 201;
-    saveResult.response = transactionState;
+    saveResult.response = transaction[0]._doc.state;
 
     return saveResult;
 }
