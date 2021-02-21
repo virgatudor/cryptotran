@@ -32,7 +32,7 @@ const addAccountDetails= async function (req) {
 
     try{
         const doc = await User.findOneAndUpdate({
-            name: req.body.name
+            _id: req.body.id
         }, { bitcoinWalletId: req.body.bitcoinWalletId,
              bitcoinWalletBalance: req.body.bitcoinWalletBalance,
              etherumWalletId: req.body.etherumWalletId,
@@ -40,7 +40,7 @@ const addAccountDetails= async function (req) {
              maxAmountPerTran: req.body.maxAmountPerTran
         }, { upsert: false });
         saveResult.responseCode = 201;
-        saveResult.response = req.body.name;
+        saveResult.response = req.body.id;
     }catch (err){
         saveResult.response = 'ceva';
         console.log(err);

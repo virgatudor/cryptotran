@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express()
 const port = 8080
 const bodyParser = require('body-parser');
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const shortURL = require('./routes/ApplicationRoutes'); 
 const uri =
   "mongodb+srv://admin:swag1234@cluster0.f55kl.mongodb.net/CryptoTran?retryWrites=true&w=majority";

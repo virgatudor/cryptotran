@@ -4,7 +4,7 @@ const UserValidator = require('../validator/UserValidator')
 
 exports.createUser = async function (req, res) {
     let reqResponse = {};
-    let userValidationErrors = UserValidator.validateUserPersonalDetails(req);
+    let userValidationErrors = await UserValidator.validateUserPersonalDetails(req);
     if(userValidationErrors.length === 0){
         reqResponse = await UserRepository.saveUser(req);
     }
@@ -23,7 +23,7 @@ exports.createUser = async function (req, res) {
 
 exports.addAccountDetails = async function(req, res){
     let reqResponse = {};
-    let userValidationErrors = UserValidator.validateUserAccountDetails(req);
+    let userValidationErrors = await UserValidator.validateUserAccountDetails(req);
     if(userValidationErrors.length === 0){
         reqResponse = await UserRepository.addAccountDetails(req);
     }

@@ -8,6 +8,6 @@ router.post("/", UserController.createUser);
 router.patch("/:name", UserController.addAccountDetails);
 router.post("/submitTransaction/", TransactionController.submitTransaction);
 router.get("/:id/transactionList/", TransactionController.findTransactionsForUserById);
-router.get("/transactionStatus/:id", TransactionController.getTransactionStatusById);
+router.get("/:id/transactionStatus/", TransactionController.findTransactionStatusById);
 
 module.exports = router;

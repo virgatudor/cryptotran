@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 const restrictions = require('./Restrictions')
 let UserSchema = new Schema({
+    _id: {type: Number},
     name: {type: String, required: true, 
         maxLength: [restrictions.nameMaxLength, 
             `Name cannot have more than ${restrictions.nameMaxLength} characters!`]},
@@ -26,6 +28,7 @@ let UserSchema = new Schema({
     maxAmountPerTran: {type: Number, required: false, 
         max: [restrictions.maxAmountPerTranValue, 
             `The transaction amount cannot be greater than ${restrictions.maxAmountPerTranValue}!`]}
-});
+}, {_id: false});
 
+UserSchema.plugin(AutoIncrement);
 module.exports = mongoose.model('User', UserSchema);
