@@ -70,7 +70,7 @@ const findTransactionsByUserId = async function (req) {
     transactions.push(await Transaction.find({ targetUser: `${req.body.id}`, state: 'Processed'}).
         select("currencyAmount currencyType sourceUser targetUser state").exec());
 
-    saveResult.responseCode = 201;
+    saveResult.responseCode = 200;
     saveResult.response = transactions;
 
     return saveResult;
@@ -84,7 +84,7 @@ const findTransactionsStatusById = async function (req) {
 
     let transaction = await Transaction.find({ _id: `${req.body.id}`}).exec();
     
-    saveResult.responseCode = 201;
+    saveResult.responseCode = 200;
     saveResult.response = transaction[0]._doc.state;
 
     return saveResult;

@@ -39,7 +39,7 @@ const addAccountDetails= async function (req) {
              etherumWalletBalance: req.body.etherumWalletBalance,
              maxAmountPerTran: req.body.maxAmountPerTran
         }, { upsert: false });
-        saveResult.responseCode = 201;
+        saveResult.responseCode = 200;
         saveResult.response = req.body.id;
     }catch (err){
         saveResult.response = 'ceva';
